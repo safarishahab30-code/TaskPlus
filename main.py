@@ -18,39 +18,42 @@ def print_menu() -> None:
     print(farsi("2. افزودن تسک جدید"))
     print(farsi("3. علامت‌زدن تسک به عنوان انجام‌شده"))
     print(farsi("4. حذف تسک"))
-    print(farsi("5. خروج"))
+    print(farsi("5. فیلتر و جستجوی تسک‌ها"))
+    print(farsi("6. خروج"))
 
-def show_tasks(todo: ToDoList) -> None:
+def show_tasks(task_list: list) -> None:
     """نمایش لیست تسک‌ها به همراه شماره و وضعیت"""
-    tasks = todo.list_tasks()
-    if not tasks:
-        print("\nهیچ تسکی ثبت نشده است!")
+    if not task_list:
+        print(farsi("\nهیچ تسکی برای نمایش وجود ندارد!"))
         return
     
-    print("\n--- لیست تسک‌ها ---")
-    for idx, task in enumerate(tasks):
+    print(farsi("\n--- لیست تسک‌ها ---"))
+    for idx, task in enumerate(task_list):
         status_text = "تکمیل شده" if task.completed else "در انتظار"
-        print(f"{idx}. [{status_text}] {task.title} - اولویت: {task.priority}")
+        date_str = f" | موعد: {task.due_date}" if getattr(task, 'due_date', None) else ""
+        line = f"{idx}. [{status_text}] {task.title} - اولویت: {task.priority}{date_str}"
+        print(farsi(line))
         if task.description:
-            print(f"   توضیحات: {task.description}")
+            print(farsi(f"   توضیحات: {task.description}"))
 
 def handle_add_task(todo: ToDoList) -> None:
     """دریافت اطلاعات تسک جدید از کاربر و افزودن آن"""
     print(farsi("\n--- افزودن تسک جدید ---"))
-    title = input(farsi("  :  عنوان تسک ")).strip()
+    title = input(farsi("عنوان تسک: ")).strip()
     if not title:
-        print("خطا: عنوان تسک نمی‌تواند خالی باشد!")
+        print(farsi("خطا: عنوان تسک نمی‌تواند خالی باشد!"))
         return
     
-    description = input("توضیحات (اختیاری): ").strip()
-    priority = input("اولویت (کم، متوسط، زیاد): ").strip() or "متوسط"
+    description = input(farsi("توضیحات (اختیاری): ")).strip()
+    priority = input(farsi("اولویت (کم، متوسط، زیاد): ")).strip() or "متوسط"
+    due_date = input(farsi("موعد انجام (مثلاً 1403-08-20 یا خالی): ")).strip()
     
-    todo.add_task(title, description, priority)
-    print("تسک با موفقیت افزوده و ذخیره شد.")
+    todo.add_task(title=title, description=description, priority=priority, due_date=due_date)
+    print(farsi("تسک با موفقیت افزوده و ذخیره شد."))
 
 def handle_complete_task(todo: ToDoList) -> None:
     """دریافت شماره تسک برای تغییر وضعیت به انجام‌شده"""
-    show_tasks(todo)
+    show_tasks(todo.list_tasks())
     if not todo.list_tasks():
         return
     
@@ -62,21 +65,19 @@ def handle_complete_task(todo: ToDoList) -> None:
             print("خطا: شماره تسک نامعتبر است!")
     except ValueError:
         print("خطا: لطفاً فقط عدد وارد کنید!")
-
 def handle_delete_task(todo: ToDoList) -> None:
     """دریافت شماره تسک برای حذف"""
-    show_tasks(todo)
+    show_tasks(todo.list_tasks())
     if not todo.list_tasks():
         return
-    
     try:
-        index = int(input("\nشماره تسکی که می‌خواهید حذف کنید را وارد کنید: "))
+        index = int(input(farsi("\nشماره تسکی که می‌خواهید حذف کنید را وارد کنید: ")))
         if todo.delete_task(index):
-            print("تسک با موفقیت حذف شد.")
+            print(farsi("تسک با موفقیت حذف شد."))
         else:
-            print("خطا: شماره تسک نامعتبر است!")
+            print(farsi("خطا: شماره تسک نامعتبر است!"))
     except ValueError:
-        print("خطا: لطفاً فقط عدد وارد کنید!")
+        print(farsi("خطا: لطفاً فقط عدد وارد کنید!"))
 
 def main():
     """حلقه اصلی اجرای برنامه CLI"""
@@ -84,10 +85,10 @@ def main():
 
     while True:
         print_menu()
-        choice = input((farsi(" : لطفاً یک گزینه انتخاب کنید (1و5) "))).strip()
+        choice = input(farsi(" : لطفاً یک گزینه انتخاب کنید (1 تا 6) ")).strip()
     
         if choice == "1":
-            show_tasks(todo)
+            show_tasks(todo.list_tasks())
         elif choice == "2":
             handle_add_task(todo)
         elif choice == "3":
@@ -95,10 +96,13 @@ def main():
         elif choice == "4":
             handle_delete_task(todo)
         elif choice == "5":
+            handle_filter_tasks(todo)
+        elif choice == "6":
             print(farsi("خروج از برنامه."))
             break
         else:
-            print(farsi("گزینه نامعتبر است! لطفاً عددی بین ۱ تا ۵ وارد کنید."))
+            print(farsi("گزینه نامعتبر است! لطفاً عددی بین ۱ تا ۶ وارد کنید."))
+
 
 if __name__ == "__main__":
     main()
